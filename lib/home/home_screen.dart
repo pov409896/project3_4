@@ -1,24 +1,14 @@
-import 'dart:developer';
-
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:project3_5/bloc/product_bloc.dart';
 import 'package:project3_5/bloc/product_state.dart';
+import 'package:project3_5/model/product_model.dart';
+import 'package:project3_5/util/app_text.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
-  static final _products = List.generate(
-    4,
-    (i) => _Product(
-      name: 'T-Shirt Tomorrow',
-      rating: 4.8,
-      views: 122,
-      price: 15.99,
-    ),
-  );
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,8 +20,14 @@ final List banner = [
   "assets/image/banner2.jpg",
 ];
 double currendPage = 0;
+bool isSelect = true;
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,41 +40,32 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(child: _BannerCard()),
             SliverToBoxAdapter(child: _SectionTitle('Popular Brand')),
             SliverToBoxAdapter(child: _BrandRow()),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.68,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) =>
-                      _ProductCard(product: HomeScreen._products[index]),
-                  childCount: HomeScreen._products.length,
-                ),
-              ),
+            BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.68,
+                        ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          _ProductCard(product: state.dataStore[index]),
+                      childCount: state.dataStore.length,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class _Product {
-  final String name;
-  final double rating;
-  final int views;
-  final double price;
-
-  _Product({
-    required this.name,
-    required this.rating,
-    required this.views,
-    required this.price,
-  });
 }
 
 class _TopBar extends StatelessWidget {
@@ -259,26 +246,24 @@ class _BrandRow extends StatelessWidget {
           return ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: state.category.length,
+            itemCount: state.categories.length,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
               return Column(
                 children: [
                   Container(
-                    width: 52,
-                    height: 52,
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F7),
-                      shape: BoxShape.circle,
+                      color: isSelect
+                          ? Colors.blueAccent
+                          : Color.fromARGB(255, 231, 231, 232),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     alignment: Alignment.center,
-                    child: Text(
-                      state.category[index],
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: AppText(
+                      text: state.categories[index],
+                      size: 14,
+                      color: isSelect ? Colors.white : Colors.black,
                     ),
                   ),
                 ],
@@ -292,7 +277,7 @@ class _BrandRow extends StatelessWidget {
 }
 
 class _ProductCard extends StatelessWidget {
-  final _Product product;
+  final ProductModel product;
   const _ProductCard({required this.product});
 
   @override
@@ -310,28 +295,7 @@ class _ProductCard extends StatelessWidget {
             child: Stack(
               children: [
                 // Swap for Image.network(product.imageUrl, fit: BoxFit.cover)
-                Container(
-                  width: double.infinity,
-                  color: const Color(0xFFE9E9EC),
-                  child: const Icon(
-                    Icons.checkroom,
-                    size: 48,
-                    color: Colors.black26,
-                  ),
-                ),
-                Positioned(
-                  right: 8,
-                  bottom: 8,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF6C7CFF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 18),
-                  ),
-                ),
+                Center(child: Image.network(product.image, fit: BoxFit.cover)),
               ],
             ),
           ),
@@ -352,13 +316,10 @@ class _ProductCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.star, size: 14, color: Colors.amber),
                     const SizedBox(width: 2),
-                    Text(
-                      '${product.rating}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    AppText(text: product.rate, size: 14),
                     const SizedBox(width: 8),
                     Text(
-                      'View(${product.views})',
+                      'View(${product.view})',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black54,
@@ -367,12 +328,24 @@ class _ProductCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppText(
+                      text: "\$${product.price.toStringAsFixed(2)}",
+                      size: 16,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          bottomRight: Radius.circular(8),
+                        ),
+                        color: Colors.blue,
+                      ),
+                      child: Icon(Icons.add, color: Colors.white),
+                    ),
+                  ],
                 ),
               ],
             ),
