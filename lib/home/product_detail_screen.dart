@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:project3_5/model/product_model.dart';
 
 /// Product Detail screen matching the provided mockup.
 /// Drop this file into your Flutter project (e.g. lib/features/product/presentation/screens/)
 /// and adapt the model/fields to your existing product entity.
 class ProductDetailScreen extends StatefulWidget {
-  final ProductDetailArgs product;
+  final ProductModel product;
 
   const ProductDetailScreen({super.key, required this.product});
 
@@ -13,14 +14,12 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  String? _selectedSize;
-  int _selectedColorIndex = 0;
+  String _selectedSize = "";
+  String _selectColore = "";
   bool _isFavorite = false;
 
   @override
   Widget build(BuildContext context) {
-    final product = widget.product;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -71,13 +70,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     // Product image
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AspectRatio(
-                        aspectRatio: 272 / 362,
+                      child: SizedBox(
+                        height: 300,
+                        width: double.infinity,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
-                          child: product.imageUrl != null
+                          child: widget.product.image != null
                               ? Image.network(
-                                  product.imageUrl!,
+                                  widget.product.image!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, __, ___) =>
                                       _imagePlaceholder(),
@@ -98,7 +98,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                product.brand,
+                                widget.product.category,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -113,7 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    product.rating.toStringAsFixed(1),
+                                    widget.product.rate,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -126,7 +126,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                           // Title
                           Text(
-                            product.name,
+                            widget.product.name,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -138,7 +138,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           Row(
                             children: [
                               Text(
-                                '\$${product.originalPrice.toStringAsFixed(0)}',
+                                '\$${widget.product.oldprice.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey,
@@ -147,14 +147,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '\$${product.price.toStringAsFixed(0)}',
+                                '\$${widget.product.price.toStringAsFixed(0)}',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              if (product.discountPercent != null)
+                              if (widget.product.discount != null)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 6,
@@ -165,7 +165,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    '${product.discountPercent}%',
+                                    '${widget.product.discount}%',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 11,
@@ -175,7 +175,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                               const Spacer(),
                               Text(
-                                '${product.soldCount}+ Sold',
+                                '${widget.product.price}+ Sold',
                                 style: const TextStyle(
                                   color: Colors.grey,
                                   fontSize: 12,
@@ -203,12 +203,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     const SizedBox(height: 8),
                                     Wrap(
                                       spacing: 8,
-                                      children: product.sizes.map((size) {
+                                      children: widget.product.size.map((size) {
                                         final selected = _selectedSize == size;
                                         return GestureDetector(
-                                          onTap: () => setState(
-                                            () => _selectedSize = size,
-                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedSize = size;
+                                            });
+                                          },
                                           child: Container(
                                             width: 32,
                                             height: 32,
@@ -217,11 +219,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               shape: BoxShape.circle,
                                               color: selected
                                                   ? Colors.black
-                                                  : Colors.transparent,
+                                                  : Colors.white,
                                               border: Border.all(
                                                 color: selected
                                                     ? Colors.black
-                                                    : Colors.grey.shade300,
+                                                    : Colors.grey,
                                               ),
                                             ),
                                             child: Text(
@@ -231,7 +233,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                 fontWeight: FontWeight.w600,
                                                 color: selected
                                                     ? Colors.white
-                                                    : Colors.black87,
+                                                    : Colors.black,
                                               ),
                                             ),
                                           ),
@@ -241,58 +243,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ],
                                 ),
                               ),
-
+                              // Spacer(),
                               // Color selector
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Color',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Color',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: product.colors
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                            final index = entry.key;
-                                            final color = entry.value;
-                                            final selected =
-                                                _selectedColorIndex == index;
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                right: 8,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: widget.product.color.map((value) {
+                                      final selectColor =
+                                          _selectColore == value;
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectColore = value;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: selectColor
+                                                    ? Colors.yellowAccent
+                                                    : Colors.grey,
+                                                width: 2,
                                               ),
-                                              child: GestureDetector(
-                                                onTap: () => setState(
-                                                  () => _selectedColorIndex =
-                                                      index,
-                                                ),
-                                                child: Container(
-                                                  width: 22,
-                                                  height: 22,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: color,
-                                                    border: Border.all(
-                                                      color: selected
-                                                          ? Colors.black
-                                                          : Colors.transparent,
-                                                      width: 2,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          })
-                                          .toList(),
-                                    ),
-                                  ],
-                                ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: _CustomeColor(value),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -308,7 +301,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            product.description,
+                            widget.product.description,
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.5,
@@ -403,72 +396,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
-}
 
-/// Simple data holder for this screen's preview/demo.
-/// Replace with your existing product entity from the domain layer.
-class ProductDetailArgs {
-  final String brand;
-  final String name;
-  final double rating;
-  final double price;
-  final double originalPrice;
-  final int? discountPercent;
-  final int soldCount;
-  final List<String> sizes;
-  final List<Color> colors;
-  final String description;
-  final String? imageUrl;
-
-  const ProductDetailArgs({
-    required this.brand,
-    required this.name,
-    required this.rating,
-    required this.price,
-    required this.originalPrice,
-    this.discountPercent,
-    required this.soldCount,
-    required this.sizes,
-    required this.colors,
-    required this.description,
-    this.imageUrl,
-  });
-}
-
-// ---- Example usage / preview ----
-class ProductDetailPreviewApp extends StatelessWidget {
-  const ProductDetailPreviewApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: ProductDetailScreen(
-        product: ProductDetailArgs(
-          brand: 'H&M',
-          name: 'T-Shirt Tomorrow',
-          rating: 4.3,
-          price: 90,
-          originalPrice: 100,
-          discountPercent: 10,
-          soldCount: 100,
-          sizes: const ['S', 'M', 'L', 'XL'],
-          colors: const [
-            Colors.black,
-            Colors.indigo,
-            Colors.brown,
-            Colors.grey,
-          ],
-          description:
-              'Stay stylish and comfortable with this modern jacket, designed '
-              'for everyday wear and all season versatility. Made from '
-              'high-quality materials, it offers a comfortable fit while '
-              'providing warmth and durability. The jacket features a sleek '
-              'design with a front zipper closure, practical pockets for '
-              'convenience, and a fashionable look that pairs perfectly with '
-              'jeans, trousers, or casual outfits.',
-        ),
-      ),
-    );
+  _CustomeColor(String text) {
+    final white = text.toLowerCase();
+    switch (text) {
+      case "white":
+      case "White":
+        return Colors.white;
+      case "blue":
+      case "Blue":
+        return Colors.blue;
+      case "black":
+      case "Black":
+        return Colors.black;
+    }
   }
 }

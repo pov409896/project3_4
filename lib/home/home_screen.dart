@@ -2,8 +2,11 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:project3_5/bloc/product_bloc.dart';
 import 'package:project3_5/bloc/product_state.dart';
+import 'package:project3_5/home/product_detail_screen.dart';
 import 'package:project3_5/model/product_model.dart';
 import 'package:project3_5/util/app_text.dart';
 
@@ -335,15 +338,20 @@ class _ProductCard extends StatelessWidget {
                       text: "\$${product.price.toStringAsFixed(2)}",
                       size: 16,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          bottomRight: Radius.circular(8),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(ProductDetailScreen(product: product));
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                          color: Colors.blue,
                         ),
-                        color: Colors.blue,
+                        child: Icon(Icons.add, color: Colors.white),
                       ),
-                      child: Icon(Icons.add, color: Colors.white),
                     ),
                   ],
                 ),
