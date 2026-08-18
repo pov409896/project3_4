@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:project3_5/bloc/product_bloc.dart';
+import 'package:project3_5/bloc/product_event.dart';
+import 'package:project3_5/bloc/product_state.dart';
+import 'package:project3_5/home/product_cart.dart';
 import 'package:project3_5/model/product_model.dart';
+import 'package:project3_5/util/app_text.dart';
 
-/// Product Detail screen matching the provided mockup.
-/// Drop this file into your Flutter project (e.g. lib/features/product/presentation/screens/)
-/// and adapt the model/fields to your existing product entity.
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
-
   const ProductDetailScreen({super.key, required this.product});
-
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
@@ -125,12 +128,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           const SizedBox(height: 4),
 
                           // Title
-                          Text(
-                            widget.product.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          BlocBuilder<ProductBloc, ProductState>(
+                            builder: (context, state) {
+                              return Row(
+                                children: [
+                                  Text(
+                                    widget.product.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(
+                                        color: Colors.blue,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        context.read<ProductBloc>().add(
+                                          IncrementEvent(),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 18,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  AppText(text: state.quantity.toString()),
+                                  SizedBox(width: 5),
+                                  Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(
+                                        color: Colors.red,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        context.read<ProductBloc>().add(
+                                          DescrementEvent(),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.remove,
+                                        size: 18,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                           const SizedBox(height: 8),
 
@@ -359,7 +418,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // TODO: buy now flow
+                          Get.to(ProductCart());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF7C83FD),
