@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project3_5/bloc/product_event.dart';
 import 'package:project3_5/bloc/product_state.dart';
@@ -24,6 +22,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<AddCartEvent>((event, emit) {
       onAddCart(event, emit);
     });
+    on<RemoveCartEvent>((event, emit) {
+      onRemove(event, emit);
+    });
   }
   void onLoadingProduct(LoadProudctEvent event, Emitter<ProductState> emit) {
     emit(state.copyItem(dataStore: dataStore.products));
@@ -39,6 +40,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   void onDescrement(DescrementEvent event, Emitter emit) {
     emit(state.copyItem(quantity: state.quantity - 1));
+  }
+
+  void onRemove(RemoveCartEvent event, Emitter emit) {
+    final remove = state.cartModel
+        .where((item) => item.product.code != event.code)
+        .toList();
+    emit(state.copyItem(cartModel: remove));
   }
 
   void onAddCart(AddCartEvent event, Emitter emit) {

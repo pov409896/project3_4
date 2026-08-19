@@ -1,4 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:project3_5/bloc/product_bloc.dart';
+import 'package:project3_5/bloc/product_event.dart';
+import 'package:project3_5/bloc/product_state.dart';
+import 'package:project3_5/model/cart_model.dart';
 
 class ProductCart extends StatefulWidget {
   const ProductCart({super.key});
@@ -8,7 +17,6 @@ class ProductCart extends StatefulWidget {
 }
 
 class _ProductCartState extends State<ProductCart> {
-  
   static const double _discount = 10.99;
   static const double _delivery = 1.00;
 
@@ -17,26 +25,79 @@ class _ProductCartState extends State<ProductCart> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(context),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                itemCount:6,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  return _CartItemCard(
-                  
-                    onIncrement: () => "",
-                    onDecrement: () => "",
-                    onRemove: () =>"",
-                  );
-                },
-              ),
-            ),
-            _buildSummary(context),
-          ],
+        child: BlocBuilder<ProductBloc, ProductState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                _buildAppBar(context),
+                Expanded(
+                  child: state.cartModel.isEmpty
+                      ? Center(child: Text("Cart Empty"))
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                          itemCount: state.cartModel.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 14),
+                          itemBuilder: (context, index) {
+                            return _CartItemCard(
+                              productModel: state.cartModel[index],
+                              onIncrement: () {},
+                              onDecrement: () {},
+                              onRemove: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text("Remove Producd"),
+                                      content: Text(
+                                        "Are You want to delete your product ? 🤔",
+                                      ),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Get.back();
+                                          },
+                                          child: Text(
+                                            "Cancel",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            context.read<ProductBloc>().add(
+                                              RemoveCartEvent(
+                                                removeCart:
+                                                    state.cartModel[index],
+                                                code: state
+                                                    .cartModel[index]
+                                                    .product
+                                                    .code,
+                                              ),
+                                            );
+                                            Get.back();
+                                          },
+                                          child: Text(
+                                            "Delete",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                log("Delete Success");
+                              },
+                            );
+                          },
+                        ),
+                ),
+                _buildSummary(context),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -89,11 +150,7 @@ class _ProductCartState extends State<ProductCart> {
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Divider(height: 1, color: Color(0xFFE5E5E5)),
           ),
-          _SummaryRow(
-            label: 'Sub Total',
-            value: 100,
-            bold: true,
-          ),
+          _SummaryRow(label: 'Sub Total', value: 100, bold: true),
           const SizedBox(height: 20),
           SizedBox(
             height: 54,
@@ -152,11 +209,12 @@ class _SummaryRow extends StatelessWidget {
 
 class _CartItemCard extends StatelessWidget {
   const _CartItemCard({
+    required this.productModel,
     required this.onIncrement,
     required this.onDecrement,
     required this.onRemove,
   });
-
+  final CartModel productModel;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onRemove;
@@ -164,7 +222,7 @@ class _CartItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -180,7 +238,15 @@ class _CartItemCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildThumbnail(),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: Image.network(
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
+              productModel.product.image,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -190,7 +256,7 @@ class _CartItemCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                       "Name",
+                        productModel.product.name,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -217,7 +283,7 @@ class _CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${"Price"}',
+                  '\$${productModel.product.price.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -226,50 +292,32 @@ class _CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Size : ${"Size"}',
+                  'Size : ${productModel.size}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                
-                  Text(
-                    'Color : ${"Color"}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _QuantityStepper(
-                    quantity: 1,
-                    onIncrement: onIncrement,
-                    onDecrement: onDecrement,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'Color : ${productModel.color}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    Spacer(),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _QuantityStepper(
+                        quantity: productModel.quantity,
+                        onIncrement: onIncrement,
+                        onDecrement: onDecrement,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildThumbnail() {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F6F6),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child:
-      //  item.imageUrl != null
-      //     ? Image.network(
-      //         item.imageUrl!,
-      //         fit: BoxFit.cover,
-      //         errorBuilder: (_, __, ___) =>
-      //             const Icon(Icons.image_outlined, color: Colors.grey),
-      //       )
-      //     : const 
-          Icon(Icons.checkroom_outlined, color: Colors.grey),
     );
   }
 }
@@ -302,10 +350,7 @@ class _QuantityStepper extends StatelessWidget {
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
           _StepperButton(icon: Icons.add, onTap: onIncrement),

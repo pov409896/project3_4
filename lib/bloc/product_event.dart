@@ -1,3 +1,4 @@
+import 'package:project3_5/model/cart_model.dart';
 import 'package:project3_5/model/product_model.dart';
 
 abstract class ProductEvent {}
@@ -24,4 +25,10 @@ class AddCartEvent extends ProductEvent {
     required this.quantity,
     required this.size,
   });
+}
+
+class RemoveCartEvent extends ProductEvent {
+  final int code;
+  final CartModel removeCart;
+  RemoveCartEvent({required this.removeCart, required this.code});
 }

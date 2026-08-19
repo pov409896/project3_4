@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -20,6 +22,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String _selectedSize = "";
   String _selectColore = "";
   bool _isFavorite = false;
+
+  void addToCart() {
+    final quantity = context.read<ProductBloc>().state.quantity;
+    if (_selectedSize.isEmpty) {
+      Get.snackbar("Message", "Please Select Size");
+      return;
+    }
+    if (_selectColore.isEmpty) {
+      Get.snackbar("Message", "Please Select Color");
+      return;
+    }
+    context.read<ProductBloc>().add(
+      AddCartEvent(
+        product: widget.product,
+        color: _selectColore,
+        quantity: quantity,
+        size: _selectedSize,
+      ),
+    );
+    log(
+      "Name : ${widget.product.name}\nColors : ${_selectColore}\nSize : ${_selectedSize}\nQuantity : ${quantity}",
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +79,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       color: _isFavorite ? Colors.redAccent : Colors.black87,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      // TODO: navigate to cart
-                    },
-                    icon: const Icon(Icons.shopping_cart_outlined),
+                  Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Get.to(ProductCart());
+                        },
+                        icon: const Icon(Icons.shopping_cart_outlined),
+                      ),
+                      BlocBuilder<ProductBloc, ProductState>(
+                        builder: (context, state) {
+                          return Positioned(
+                            right: 10,
+                            top: 5,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                state.cartModel.length.toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -396,7 +444,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          // TODO: add to cart
+                          addToCart();
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
