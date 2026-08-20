@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project3_5/cart/cart_screen.dart';
 import 'package:project3_5/favorite/favorite_screen.dart';
 import 'package:project3_5/home/home_screen.dart';
+import 'package:project3_5/home/product_cart.dart';
 import 'package:project3_5/profile/profile_screen.dart';
 
 class MainHomePage extends StatefulWidget {
@@ -15,7 +16,7 @@ class _MainHomePageState extends State<MainHomePage> {
   final List page = [
     HomeScreen(),
     FavoriteScreen(),
-    CartScreen(),
+    ProductCart(check:  false,),
     ProfileScreen(),
   ];
   int currendPage = 0;

@@ -39,4 +39,31 @@ class ProductState {
       cartModel: cartModel ?? this.cartModel,
     );
   }
+
+  // double get getotal => cartModel.fold(
+  //   0.0,
+  //   (sum, item) => sum += item.quantity * item.product.price,
+  // );
+
+  double getotal() {
+    double total = 0.0;
+    for (CartModel item in cartModel) {
+      total += item.quantity * item.product.price;
+    }
+    return total;
+  }
+
+  double getDiscount() {
+    double discount = (getotal() > 20 && getotal() <= 40)
+        ? 5.5
+        : (getotal() > 40 && getotal() <= 70)
+        ? 6.5
+        : (getotal() > 70 && getotal() <= 100)
+        ? 7.0
+        : 8.0;
+    return getotal() * discount / 100;
+  }
+  double subtotal(){
+    return getotal()-getDiscount()+1;
+  }
 }

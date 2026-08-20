@@ -41,9 +41,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         size: _selectedSize,
       ),
     );
-    log(
-      "Name : ${widget.product.name}\nColors : ${_selectColore}\nSize : ${_selectedSize}\nQuantity : ${quantity}",
-    );
+    context.read<ProductBloc>().add(ResetQuantityEvent());
+    log("Quantity : $quantity");
   }
 
   @override
@@ -83,7 +82,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Get.to(ProductCart());
+                          Get.to(ProductCart(check:  true,));
                         },
                         icon: const Icon(Icons.shopping_cart_outlined),
                       ),
@@ -466,7 +465,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.to(ProductCart());
+                          addToCart();
+                          Get.to(ProductCart(check:  true,));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF7C83FD),

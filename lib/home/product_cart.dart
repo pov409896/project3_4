@@ -10,16 +10,14 @@ import 'package:project3_5/bloc/product_state.dart';
 import 'package:project3_5/model/cart_model.dart';
 
 class ProductCart extends StatefulWidget {
-  const ProductCart({super.key});
+  bool check = false;
+  ProductCart({super.key, required this.check});
 
   @override
   State<ProductCart> createState() => _ProductCartState();
 }
 
 class _ProductCartState extends State<ProductCart> {
-  static const double _discount = 10.99;
-  static const double _delivery = 1.00;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,8 +39,27 @@ class _ProductCartState extends State<ProductCart> {
                           itemBuilder: (context, index) {
                             return _CartItemCard(
                               productModel: state.cartModel[index],
-                              onIncrement: () {},
-                              onDecrement: () {},
+                              onIncrement: () {
+                                context.read<ProductBloc>().add(
+                                  UpdateQuantityEvent(
+                                    cartModel: state.cartModel[index],
+                                    quantity:
+                                        state.cartModel[index].quantity + 1,
+                                  ),
+                                );
+                              },
+                              onDecrement: () {
+                                int qyt = 1;
+                                (state.cartModel[index].quantity > 1)
+                                    ? state.cartModel[index].quantity - 1
+                                    : state.cartModel[index].quantity;
+                                context.read<ProductBloc>().add(
+                                  UpdateQuantityEvent(
+                                    cartModel: state.cartModel[index],
+                                    quantity: qyt,
+                                  ),
+                                );
+                              },
                               onRemove: () {
                                 showDialog(
                                   context: context,
@@ -108,11 +125,13 @@ class _ProductCartState extends State<ProductCart> {
       padding: const EdgeInsets.fromLTRB(12, 8, 20, 8),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left, size: 28),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          const Text(
+          widget.check
+              ? IconButton(
+                  icon: const Icon(Icons.chevron_left, size: 28),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                )
+              : SizedBox(),
+          Text(
             'Product Cart',
             style: TextStyle(
               fontSize: 20,
@@ -138,42 +157,50 @@ class _ProductCartState extends State<ProductCart> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SummaryRow(label: 'Total', value: 100),
-          const SizedBox(height: 8),
-          _SummaryRow(label: 'Discount', value: _discount),
-          const SizedBox(height: 8),
-          _SummaryRow(label: 'Delivery', value: _delivery),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Divider(height: 1, color: Color(0xFFE5E5E5)),
-          ),
-          _SummaryRow(label: 'Sub Total', value: 100, bold: true),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 54,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7B8FE8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(27),
-                ),
-                elevation: 0,
+      child: BlocBuilder<ProductBloc, ProductState>(
+        builder: (context, state) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _SummaryRow(label: 'Total', value: state.getotal()),
+              const SizedBox(height: 8),
+              _SummaryRow(label: 'Discount', value: state.getDiscount()),
+              const SizedBox(height: 8),
+              _SummaryRow(label: 'Delivery', value: 1),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(height: 1, color: Color(0xFFE5E5E5)),
               ),
-              child: const Text(
-                'Check Out',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+              _SummaryRow(
+                label: 'Sub Total',
+                value: state.subtotal(),
+                bold: true,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7B8FE8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(27),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Check Out',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

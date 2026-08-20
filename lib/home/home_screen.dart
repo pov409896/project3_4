@@ -6,6 +6,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:project3_5/bloc/product_bloc.dart';
 import 'package:project3_5/bloc/product_state.dart';
+import 'package:project3_5/home/product_cart.dart';
 import 'package:project3_5/home/product_detail_screen.dart';
 import 'package:project3_5/model/product_model.dart';
 import 'package:project3_5/util/app_text.dart';
@@ -103,12 +104,34 @@ class _TopBar extends StatelessWidget {
                 onPressed: () {},
                 icon: const Icon(Icons.search, color: Colors.black87),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Colors.black87,
-                ),
+              Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Get.to(ProductCart(check: true,));
+                    },
+                    icon: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, state) {
+                      return Positioned(
+                        right: 10,
+                        top: 5,
+                        child: Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            state.cartModel.length.toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

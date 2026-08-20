@@ -32,3 +32,11 @@ class RemoveCartEvent extends ProductEvent {
   final CartModel removeCart;
   RemoveCartEvent({required this.removeCart, required this.code});
 }
+
+class UpdateQuantityEvent extends ProductEvent {
+  final CartModel cartModel;
+  final int quantity;
+  UpdateQuantityEvent({required this.cartModel, required this.quantity});
+}
+
+class ResetQuantityEvent extends ProductEvent {}
