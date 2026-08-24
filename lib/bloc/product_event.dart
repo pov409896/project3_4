@@ -40,3 +40,8 @@ class UpdateQuantityEvent extends ProductEvent {
 }
 
 class ResetQuantityEvent extends ProductEvent {}
+
+class FilterProductEvent extends ProductEvent {
+  final String category;
+  FilterProductEvent({required this.category});
+}

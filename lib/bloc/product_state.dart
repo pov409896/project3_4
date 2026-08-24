@@ -5,12 +5,16 @@ class ProductState {
   final List<ProductModel> dataStore;
   final ProductModel? detailProduct;
   final List<CartModel> cartModel;
+  final List<ProductModel>? filterProduct;
+  final String category;
   int quantity;
   ProductState({
     required this.dataStore,
     this.detailProduct,
     this.quantity = 1,
     required this.cartModel,
+    required this.category,
+    this.filterProduct,
   });
   //create new object ProductState
   factory ProductState.init() {
@@ -19,6 +23,8 @@ class ProductState {
       detailProduct: null,
       quantity: 1,
       cartModel: [],
+      filterProduct: [],
+      category: "All",
     );
   }
   List<String> get categories {
@@ -31,12 +37,16 @@ class ProductState {
     ProductModel? deitalProduct,
     int? quantity,
     List<CartModel>? cartModel,
+    List<ProductModel>? filterProduct,
+    String? category,
   }) {
     return ProductState(
       dataStore: dataStore ?? this.dataStore,
       detailProduct: deitalProduct ?? this.detailProduct,
       quantity: quantity ?? this.quantity,
       cartModel: cartModel ?? this.cartModel,
+      filterProduct: filterProduct ?? this.filterProduct,
+      category: category ?? this.category,
     );
   }
 
@@ -63,7 +73,8 @@ class ProductState {
         : 8.0;
     return getotal() * discount / 100;
   }
-  double subtotal(){
-    return getotal()-getDiscount()+1;
+
+  double subtotal() {
+    return getotal() - getDiscount() + 1;
   }
 }

@@ -11,7 +11,7 @@ import 'package:project3_5/model/cart_model.dart';
 
 class ProductCart extends StatefulWidget {
   bool check = false;
-  ProductCart({super.key, required this.check});
+   ProductCart({super.key, required this.check});
 
   @override
   State<ProductCart> createState() => _ProductCartState();

@@ -31,9 +31,17 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ResetQuantityEvent>((event, emit) {
       onReset(event, emit);
     });
+    on<FilterProductEvent>((event, emit) {
+      onFilterProduct(event, emit);
+    });
   }
   void onLoadingProduct(LoadProudctEvent event, Emitter<ProductState> emit) {
-    emit(state.copyItem(dataStore: dataStore.products));
+    emit(
+      state.copyItem(
+        dataStore: dataStore.products,
+        filterProduct: dataStore.products,
+      ),
+    );
   }
 
   void onReset(ResetQuantityEvent event, Emitter emit) {
@@ -64,7 +72,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   void onUpdate(UpdateQuantityEvent event, Emitter emit) {
-    
     final cartItem = state.cartModel.map((item) {
       if (item.product.code == event.cartModel.product.code &&
           item.size == event.cartModel.size &&
@@ -100,5 +107,21 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       );
     }
     emit(state.copyItem(cartModel: cartItem));
+  }
+
+  void onFilterProduct(FilterProductEvent event, Emitter emit) {
+    if (event.category == "All") {
+      emit(
+        state.copyItem(
+          filterProduct: state.dataStore,
+          category: event.category,
+        ),
+      );
+      return;
+    }
+    final categories = state.dataStore
+        .where((item) => item.category == event.category)
+        .toList();
+    emit(state.copyItem(filterProduct: categories, category: event.category));
   }
 }

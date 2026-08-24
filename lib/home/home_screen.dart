@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:project3_5/bloc/product_bloc.dart';
+import 'package:project3_5/bloc/product_event.dart';
 import 'package:project3_5/bloc/product_state.dart';
 import 'package:project3_5/home/product_cart.dart';
 import 'package:project3_5/home/product_detail_screen.dart';
@@ -24,7 +27,6 @@ final List banner = [
   "assets/image/banner2.jpg",
 ];
 double currendPage = 0;
-bool isSelect = true;
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  bool isSelect = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,8 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) =>
-                          _ProductCard(product: state.dataStore[index]),
-                      childCount: state.dataStore.length,
+                          _ProductCard(product: state.filterProduct![index]),
+                      childCount: state.filterProduct!.length,
                     ),
                   ),
                 );
@@ -108,7 +111,7 @@ class _TopBar extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Get.to(ProductCart(check: true,));
+                      Get.to(ProductCart(check: true));
                     },
                     icon: const Icon(Icons.shopping_cart_outlined),
                   ),
@@ -244,16 +247,21 @@ class _BannerCardState extends State<_BannerCard> {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
+class _SectionTitle extends StatefulWidget {
   final String title;
   const _SectionTitle(this.title);
 
+  @override
+  State<_SectionTitle> createState() => _SectionTitleState();
+}
+
+class _SectionTitleState extends State<_SectionTitle> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
-        title,
+        widget.title,
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
       ),
     );
@@ -275,21 +283,34 @@ class _BrandRow extends StatelessWidget {
             itemCount: state.categories.length,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
+              final isSelect = state.categories[index] == state.category;
               return Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelect
-                          ? Colors.blueAccent
-                          : Color.fromARGB(255, 231, 231, 232),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    alignment: Alignment.center,
-                    child: AppText(
-                      text: state.categories[index],
-                      size: 14,
-                      color: isSelect ? Colors.white : Colors.black,
+                  GestureDetector(
+                    onTap: () {
+                      context.read<ProductBloc>().add(
+                        FilterProductEvent(category: state.categories[index]),
+                      );
+                      log(isSelect.toString());
+                      log(state.categories[index]);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelect
+                            ? Colors.blueAccent
+                            : Color.fromARGB(255, 231, 231, 232),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      alignment: Alignment.center,
+                      child: AppText(
+                        text: state.categories[index],
+                        size: 14,
+                        color: isSelect ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 ],
