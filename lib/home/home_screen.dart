@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
   }
-
   bool isSelect = false;
   @override
   Widget build(BuildContext context) {

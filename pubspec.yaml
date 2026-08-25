@@ -38,6 +38,8 @@ dependencies:
   flutter_image_slideshow: ^0.1.6
   dots_indicator: ^4.0.1
   get: ^4.7.3
+  firebase_auth: ^6.6.0
+  firebase_core: ^4.14.0
 
 dev_dependencies:
   flutter_test:
