@@ -46,6 +46,30 @@ class _StudentScreenState extends State<StudentScreen> {
     }
   }
 
+  void deleteData(String id) async {
+    await FirebaseFirestore.instance.collection('student').doc(id).delete();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Delete Student Success")));
+  }
+
+  void updateData(String id) async {
+    await FirebaseFirestore.instance.collection('student').doc(id).update({
+      'name': name.text,
+      'gender': gender.text,
+      'address': address.text,
+      'image': image.text,
+    });
+    name.clear();
+    gender.clear();
+    address.clear();
+    image.clear();
+    Navigator.pop(context);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Update Student Success")));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,9 +116,78 @@ class _StudentScreenState extends State<StudentScreen> {
                                   style: TextStyle(fontSize: 22),
                                 ),
                                 SizedBox(width: 70),
-                                Icon(Icons.edit, color: Colors.green),
+                                GestureDetector(
+                                  onTap: () {
+                                    name.text = stu['name'];
+                                    gender.text = stu['gender'];
+                                    address.text = stu['address'];
+                                    image.text = stu['image'];
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text("Update Student"),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              TextField(
+                                                controller: name,
+                                                decoration: InputDecoration(
+                                                  hintText: "stu_name",
+                                                ),
+                                              ),
+                                              TextField(
+                                                controller: gender,
+                                                decoration: InputDecoration(
+                                                  hintText: "stu_gender",
+                                                ),
+                                              ),
+                                              TextField(
+                                                controller: address,
+                                                decoration: InputDecoration(
+                                                  hintText: "stu_address",
+                                                ),
+                                              ),
+                                              TextField(
+                                                controller: image,
+                                                decoration: InputDecoration(
+                                                  hintText: "stu_image",
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text("Cancel"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                updateData(stu.id);
+                                              },
+                                              child: Text(
+                                                "Update",
+                                                style: TextStyle(
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Icon(Icons.edit, color: Colors.green),
+                                ),
                                 SizedBox(width: 5),
-                                Icon(Icons.delete, color: Colors.red),
+                                GestureDetector(
+                                  onTap: () {
+                                    deleteData(stu.id);
+                                  },
+                                  child: Icon(Icons.delete, color: Colors.red),
+                                ),
                               ],
                             ),
                           ],
